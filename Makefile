@@ -1,8 +1,8 @@
 ARMGNU ?= aarch64-linux-gnu
 
 COPS   = -Wall -ffreestanding -nostdlib -nostartfiles \
-         -mgeneral-regs-only -mcpu=cortex-a72 -Iinclude -O2
-ASMOPS = -Iinclude -mcpu=cortex-a72
+         -mgeneral-regs-only -mcpu=cortex-a72 -I. -Iinclude -Idrivers -O2
+ASMOPS = -I. -Iinclude -Idrivers -mcpu=cortex-a72
 
 BUILD_DIR = build
 
