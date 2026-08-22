@@ -3,6 +3,11 @@
 
 void kernel_main(void){
     uart_init();
-    uart_puts("Hello World\n");
-    uart_hex(0xFFFF0000FFFF1234);
+    uart_puts("Kernel starting\n");
+    
+    asm volatile("svc #0");
+
+    uart_puts("never reached.\n");
+
+
 }

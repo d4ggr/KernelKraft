@@ -16,10 +16,14 @@ master:
     eret
 
 el1_entry:
+    adr x0, vectors
+    msr vbar_el1,x0
     adr x0, bss_begin
     adr x1, bss_end
     sub x1, x1, x0
     cbz x1, skip_bss
+    
+
 bss_loop:
     str xzr, [x0], #8
     subs x1, x1, #8
