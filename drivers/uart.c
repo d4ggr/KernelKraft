@@ -1,6 +1,6 @@
 #include "peripherals/uart.h"
 #include "types.h"
-#include "uart.h"
+#include "drivers/uart.h"
 
 void uart_init(void){
     UART_CR = 0;

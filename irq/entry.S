@@ -134,3 +134,13 @@ el1_irq:
 
 .globl err_hang
 err_hang: b err_hang
+
+.globl enable_irq
+enable_irq:
+  msr daifclr, #2
+  ret
+
+.globl disable_irq
+disable_irq:
+  msr daifset, #2
+  ret

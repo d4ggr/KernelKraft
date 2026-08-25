@@ -1,5 +1,7 @@
-#include "uart.h"
+#include "drivers/uart.h"
+#include "drivers/timer.h"
 #include "irq.h"
+#include "peripherals/irq.h"
 #include "types.h"
 
 const char* entry_error_messages[] = {
@@ -32,6 +34,13 @@ void show_invalid_entry_message(int type, uint64_t esr, uint64_t addr){
       uart_puts("\n");
 }
 
+void enable_interrupt_controller(void){
+    ENABLE_IRQS_1 = SYSTEM_TIMER_IRQ_1 ;
+}
+
 void handle_irq(void){
-  while(1);
+  if(IRQ_PENDING_1 == SYSTEM_TIMER_IRQ_1){
+    handle_timer_irq();
+    return ;
+  }
 }
