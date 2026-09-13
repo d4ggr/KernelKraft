@@ -1,49 +1,72 @@
-#include "types.h"
-#include "drivers/uart.h"
 #include "drivers/timer.h"
+#include "drivers/uart.h"
 #include "irq.h"
+#include "mm/heap.h"
 #include "mm/pmm.h"
+#include "types.h"
 
-void kernel_main(void){
-    uart_init();
-    uart_puts("Kernel starting\n");
-    timer_init();
-    uart_puts("Timer initialized\n");
-    enable_interrupt_controller();    
+void kernel_main(void)
+{
+  uart_init();
+  uart_puts("Kernel starting\n");
+  timer_init();
+  enable_interrupt_controller();
+  enable_irq();
 
-    enable_irq();
+  uart_puts("\n--- Initializing PMM ---\n");
+  pmm_init();
 
-    uart_puts("\n--- Initializing PMM ---\n");
-    pmm_init();
+  uart_puts("\n--- Initializing Heap ---\n");
+  heap_init();
+  uart_puts("\n");
 
-    uart_puts("\nInitial Free Pages: ");
-    uart_hex(pmm_get_free_page_count());
-    uart_puts("\n");
+  uart_puts("=== TEST 1: Basic Allocation ===\n");
+  void *a = kmalloc(64);
+  void *b = kmalloc(128);
+  void *c = kmalloc(32);
+  uart_puts("a (64B)  : ");
+  uart_hex((uint64_t)a);
+  uart_puts("\n");
+  uart_puts("b (128B) : ");
+  uart_hex((uint64_t)b);
+  uart_puts("\n");
+  uart_puts("c (32B)  : ");
+  uart_hex((uint64_t)c);
+  uart_puts("\n");
 
-    void *p1 = pmm_alloc();
-    void *p2 = pmm_alloc();
-    void *p3 = pmm_alloc();
+  uart_puts("\n=== TEST 2: Sequential Addresses (Splitting) ===\n");
+  uart_puts("b should be a + 64 + sizeof(HeapBlock) (32 bytes) = a + 96\n");
+  uart_puts("a + 96   : "); uart_hex((uint64_t)a + 96); uart_puts("\n");
+  uart_puts("b actual : "); uart_hex((uint64_t)b);       uart_puts("\n");
 
-    uart_puts("Allocated Page 1: ");
-    uart_hex((uint64_t)p1);
-    uart_puts("\nAllocated Page 2: ");
-    uart_hex((uint64_t)p2);
-    uart_puts("\nAllocated Page 3: ");
-    uart_hex((uint64_t)p3);
-    uart_puts("\n");
+  uart_puts("\n=== TEST 3: Free and Reuse ===\n");
+  kfree(b);
+  void *d = kmalloc(64);
+  uart_puts("After freeing b, kmalloc(64) gave: ");
+  uart_hex((uint64_t)d);
+  uart_puts("\n");
+  uart_puts("Should be same address as b: ");
+  uart_hex((uint64_t)b);
+  uart_puts("\n");
 
-    uart_puts("Freeing Page 2...\n");
-    pmm_free(p2);
+  uart_puts("\n=== TEST 4: Coalescing Proof ===\n");
+  kfree(a);
+  kfree(d); /* a and d are adjacent free blocks now — should coalesce */
+  void *e = kmalloc(150);
+  uart_puts("After freeing a and d (adjacent), kmalloc(150) gave: ");
+  uart_hex((uint64_t)e);
+  uart_puts("\n");
+  uart_puts("Should reuse a's address (coalesced): ");
+  uart_hex((uint64_t)a);
+  uart_puts("\n");
 
-    void *p4 = pmm_alloc();
-    uart_puts("Allocated Page 4 (should reuse Page 2): ");
-    uart_hex((uint64_t)p4);
-    uart_puts("\n\n");
+  uart_puts("\n--- Heap tests complete ---\n\n");
 
-    while(1){
-        for(uint64_t i = 0 ; i < 200000000 ; i++){
-        }
-        uart_puts("kernel: foreground loop running\n");
+  while (1)
+  {
+    for (uint64_t i = 0; i < 200000000; i++)
+    {
     }
-
+    uart_puts("kernel: foreground loop running\n");
+  }
 }
