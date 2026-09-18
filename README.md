@@ -1,1 +1,1 @@
-# KernelKraft — RPi 4 Bare Metal OS
+# KernelKraft — RPi 3B Bare Metal OS
