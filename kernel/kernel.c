@@ -2,6 +2,7 @@
 #include "drivers/uart.h"
 #include "irq.h"
 #include "mm/heap.h"
+#include "mm/mmu.h"
 #include "mm/pmm.h"
 #include "types.h"
 
@@ -15,6 +16,10 @@ void kernel_main(void)
 
   uart_puts("\n--- Initializing PMM ---\n");
   pmm_init();
+
+  uart_puts("\n--- Initializing MMU ---\n");
+  mmu_init();
+  uart_puts("MMU enabled\n");
 
   uart_puts("\n--- Initializing Heap ---\n");
   heap_init();
@@ -36,8 +41,12 @@ void kernel_main(void)
 
   uart_puts("\n=== TEST 2: Sequential Addresses (Splitting) ===\n");
   uart_puts("b should be a + 64 + sizeof(HeapBlock) (32 bytes) = a + 96\n");
-  uart_puts("a + 96   : "); uart_hex((uint64_t)a + 96); uart_puts("\n");
-  uart_puts("b actual : "); uart_hex((uint64_t)b);       uart_puts("\n");
+  uart_puts("a + 96   : ");
+  uart_hex((uint64_t)a + 96);
+  uart_puts("\n");
+  uart_puts("b actual : ");
+  uart_hex((uint64_t)b);
+  uart_puts("\n");
 
   uart_puts("\n=== TEST 3: Free and Reuse ===\n");
   kfree(b);
