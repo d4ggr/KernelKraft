@@ -9,6 +9,8 @@ proc_hang:
     b proc_hang
 
 master:
+    mov x0, #(1 << 31)
+    msr hcr_el2, x0
     mov x0, #0x3c5
     msr spsr_el2, x0
     adr x0, el1_entry
