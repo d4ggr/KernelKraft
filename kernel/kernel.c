@@ -4,7 +4,28 @@
 #include "mm/heap.h"
 #include "mm/mmu.h"
 #include "mm/pmm.h"
+#include "sched/task.h"
 #include "types.h"
+
+void task_a(void)
+{
+  while (1)
+  {
+    uart_puts("task A running\n");
+    for (uint64_t i = 0; i < 500000000; i++)
+      ;
+  }
+}
+
+void task_b(void)
+{
+  while (1)
+  {
+    uart_puts("task B running\n");
+    for (uint64_t i = 0; i < 500000000; i++)
+      ;
+  }
+}
 
 void kernel_main(void)
 {
@@ -71,11 +92,11 @@ void kernel_main(void)
 
   uart_puts("\n--- Heap tests complete ---\n\n");
 
-  while (1)
-  {
-    for (uint64_t i = 0; i < 200000000; i++)
-    {
-    }
-    uart_puts("kernel: foreground loop running\n");
-  }
+  uart_puts("\n--- Initializing Scheduler ---\n");
+  task_init();
+  task_create(task_a);
+  task_create(task_b);
+  uart_puts("Tasks created\n");
+
+  task_run_first();
 }

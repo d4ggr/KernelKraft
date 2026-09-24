@@ -1,13 +1,13 @@
 ARMGNU ?= aarch64-linux-gnu
 
 COPS   = -Wall -ffreestanding -nostdlib -nostartfiles \
-         -mgeneral-regs-only -mcpu=cortex-a72 -I. -Iinclude -Iinclude/drivers -Idrivers -Iirq -O2 -g
+         -mgeneral-regs-only -mcpu=cortex-a72 -I. -Iinclude -Iinclude/drivers -Idrivers -Iirq -Iinclude/sched -O2 -g
 ASMOPS = -I. -Iinclude -Iinclude/drivers -Idrivers -Iirq -mcpu=cortex-a72
 
 BUILD_DIR = build
 
-C_FILES   = $(wildcard kernel/*.c drivers/*.c irq/*.c mm/*.c lib/*.c game/*.c)
-S_FILES   = $(wildcard boot/*.S irq/*.S)
+C_FILES   = $(wildcard kernel/*.c drivers/*.c irq/*.c mm/*.c lib/*.c game/*.c sched/*.c)
+S_FILES   = $(wildcard boot/*.S irq/*.S sched/*.S)
 
 OBJ_FILES = $(C_FILES:%.c=$(BUILD_DIR)/%_c.o) \
             $(S_FILES:%.S=$(BUILD_DIR)/%_s.o)

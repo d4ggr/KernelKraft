@@ -1,6 +1,7 @@
 #include "drivers/timer.h"
 #include "drivers/uart.h"
 #include "peripherals/timer.h"
+#include "sched/task.h"
 
 void timer_init(void){
     TIMER_C1 = TIMER_CLO + 200000;
@@ -8,8 +9,6 @@ void timer_init(void){
 
 void handle_timer_irq(void){
     TIMER_C1 = TIMER_CLO + 200000;
-
     TIMER_CS = (1<<1);
-
-    uart_puts("TIMER INTERRUPT RECEIVED\n");
+    schedule();
 }
