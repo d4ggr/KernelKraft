@@ -47,7 +47,13 @@ extern void context_switch(struct Task *prev, struct Task *next);
 
 void schedule(void)
 {
-  uint64_t next = (curr_task_idx + 1) % n_active_tasks;
+  uint64_t next = curr_task_idx;
+  for (uint64_t i = 0; i < n_active_tasks; i++)
+  {
+    next = (next + 1) % n_active_tasks;
+    if (p_table[next].state != TASK_ZOMBIE)
+      break;
+  }
 
   if (next == curr_task_idx)
     return;

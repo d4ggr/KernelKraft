@@ -2,6 +2,7 @@
 #include "drivers/timer.h"
 #include "irq.h"
 #include "peripherals/irq.h"
+#include "syscall.h"
 #include "types.h"
 
 const char* entry_error_messages[] = {
@@ -42,5 +43,23 @@ void handle_irq(void){
   if(IRQ_PENDING_1 == SYSTEM_TIMER_IRQ_1){
     handle_timer_irq();
     return ;
+  }
+}
+
+void handle_sync_exception(struct Trapframe *regs)
+{
+  uint64_t esr;
+  asm volatile("mrs %0, esr_el1" : "=r"(esr));
+  uint64_t ec = (esr >> 26) & 0x3F;
+
+  if (ec == 0x15)
+  {
+    regs->x[0] = syscall_handler(regs->x[8], regs->x[0], regs->x[1], regs->x[2]);
+  }
+  else
+  {
+    uart_puts("UNKNOWN SYNC EXCEPTION\n");
+    show_invalid_entry_message(4, esr, regs->elr_el1);
+    while (1);
   }
 }
