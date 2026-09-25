@@ -5,26 +5,60 @@
 #include "mm/mmu.h"
 #include "mm/pmm.h"
 #include "sched/task.h"
+#include "syscall.h"
 #include "types.h"
+
+static inline int64_t syscall(uint64_t num, uint64_t arg0, uint64_t arg1, uint64_t arg2)
+{
+  register uint64_t x8 asm("x8") = num;
+  register uint64_t x0 asm("x0") = arg0;
+  register uint64_t x1 asm("x1") = arg1;
+  register uint64_t x2 asm("x2") = arg2;
+
+  asm volatile(
+      "svc #0\n"
+      : "+r"(x0)
+      : "r"(x8), "r"(x1), "r"(x2)
+      : "memory");
+
+  return x0;
+}
+
+int64_t write(const char *buf, uint64_t len)
+{
+  return syscall(SYS_WRITE, (uint64_t)buf, len, 0);
+}
+
+int64_t getpid(void)
+{
+  return syscall(SYS_GETPID, 0, 0, 0);
+}
+
+void exit(int64_t code)
+{
+  syscall(SYS_EXIT, (uint64_t)code, 0, 0);
+}
 
 void task_a(void)
 {
   while (1)
   {
-    uart_puts("task A running\n");
-    for (uint64_t i = 0; i < 500000000; i++)
+    write("task A (pid 0) running via sys_write!\n", 38);
+    for (uint64_t i = 0; i < 50000000; i++)
       ;
   }
 }
 
 void task_b(void)
 {
-  while (1)
+  for (int i = 0; i < 3; i++)
   {
-    uart_puts("task B running\n");
-    for (uint64_t i = 0; i < 500000000; i++)
+    write("task B (pid 1) running via sys_write!\n", 38);
+    for (uint64_t j = 0; j < 50000000; j++)
       ;
   }
+  write("task B exiting via sys_exit!\n", 30);
+  exit(0);
 }
 
 void kernel_main(void)
